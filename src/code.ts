@@ -37,7 +37,7 @@ async function main(nodes: Array<SceneNode>) {
 		if (instance) {
 			serialized.push({
 				name: node.name,
-				lua: instance.toLua(),
+				lua: "return " + instance.toLua(),
 			});
 		}
 	}
