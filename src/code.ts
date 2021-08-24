@@ -35,7 +35,10 @@ async function main(nodes: Array<SceneNode>) {
 		let instance = getInstanceWithChildren(node);
 
 		if (instance) {
-			serialized.push(instance.toLua());
+			serialized.push({
+				name: node.name,
+				lua: instance.toLua(),
+			});
 		}
 	}
 
