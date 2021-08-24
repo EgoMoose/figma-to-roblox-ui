@@ -1,10 +1,13 @@
 window.onmessage = async (event) => {
 	if (!event.data.pluginMessage) return;
 
-	const { sent } = event.data.pluginMessage;
+	const { serialized } = event.data.pluginMessage;
 
 	return new Promise(resolve => {
-		console.log(sent);
+		for (let lua of serialized) {
+			console.log(lua);
+		}
+		
 		resolve(undefined);
 	}).then(() => {
 		window.parent.postMessage({ pluginMessage: "Done!" }, "*");

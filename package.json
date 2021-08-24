@@ -4,7 +4,8 @@
   "description": "Converts a Figma project to Roblox UI",
   "main": "code.js",
   "scripts": {
-    "build": "tsc -p tsconfig.json"
+    "build-dev": "npx webpack --mode=development",
+	"build-opt": "npx webpack --mode=production"
   },
   "author": "",
   "license": "",
