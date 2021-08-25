@@ -1,7 +1,7 @@
 export function getBackgroundRGBA(node) {
 	let fills = node.fills;
 
-	if (fills.length === 1) {
+	if (fills && fills.length === 1) {
 		let paint = fills[0];
 		if (paint.type == "SOLID" && paint.blendMode == "NORMAL") {
 			let rgb = paint.color;
@@ -16,7 +16,7 @@ export function getBackgroundRGBA(node) {
 export function getStrokeRGBA(node) {
 	let strokes = node.strokes;
 
-	if (strokes.length === 1) {
+	if (strokes && strokes.length === 1) {
 		let paint = strokes[0];
 		if (paint.type == "SOLID" && paint.blendMode == "NORMAL") {
 			let rgb = paint.color;
@@ -39,11 +39,19 @@ export function getTextAlignment(property) {
 }
 
 export function getPosition(node, offset = [0, 0]) {
+	let rx = node.x;
+	let ry = node.y;
+
+	if (node.parent.type == "GROUP") {
+		rx -= node.parent.x;
+		ry -= node.parent.y;
+	}
+
 	let radians = node.rotation * (Math.PI / 180);
 	let c = Math.cos(radians);
 	let s = Math.sin(radians);
-	let x = node.x + offset[0]
-	let y = node.y + offset[1]
+	let x = rx + offset[0]
+	let y = ry + offset[1]
 
 	return [x * c + y * s, y * c - x * s,]
 }

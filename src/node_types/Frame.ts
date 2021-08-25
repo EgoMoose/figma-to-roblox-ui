@@ -218,9 +218,9 @@ export default function Frame(node) {
 		});
 
 		frame.addChild(radius);
-	} 
+	}
 	
-	if (node.strokeWeight > 0) {
+	if (strokeRGBA[3] !== 0 && node.strokeWeight > 0) {
 		let content = frame.clone();
 		content.properties.Name = "Content";
 		content.properties.Size = new RbxTypes.UDim2(1, 0, 1, 0);
