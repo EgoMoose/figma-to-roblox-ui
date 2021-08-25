@@ -13,7 +13,21 @@ export default class Instance {
 	}
 
 	clone(): Instance {
-		return new Instance(Object.assign({}, this.properties));
+		let child: Instance;
+		let copy = new Instance(Object.assign({}, this.properties));
+		copy.content = copy;
+
+		for (child of this.children) {
+			let childCopy = child.clone();
+
+			if (child === this.content) {
+				copy.content = childCopy;
+			}
+
+			copy.children.push(childCopy);
+		}
+
+		return copy;
 	}
 
 	merge(other: Instance): Instance {
