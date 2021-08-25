@@ -3,8 +3,6 @@ import * as NodeTypes from './node_types';
 
 function getInstance(node: SceneNode): Instance {
 	let instance = null;
-
-	console.log(node.type);
 	
 	if (NodeTypes[node.type]) {
 		instance = NodeTypes[node.type](node);
@@ -20,7 +18,7 @@ function getInstanceWithChildren(node: SceneNode): Instance {
 		for (let childNode of node.children) {
 			let childInstance = getInstanceWithChildren(childNode);
 			if (childInstance) {
-				instance.addChild(childInstance);
+				instance.content.addChild(childInstance);
 			}
 		}
 	}

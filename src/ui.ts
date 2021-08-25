@@ -1,4 +1,4 @@
-import JSZip from "../node_modules/jszip/dist/jszip.min.js"; 
+import JSZip from "../node_modules/jszip/dist/jszip.min.js";
 
 window.onmessage = async (event) => {
 	if (!event.data.pluginMessage) return;
@@ -10,7 +10,6 @@ window.onmessage = async (event) => {
 		
 		for (let ui of serialized) {
 			zip.file(`${ui.name}.lua`, ui.lua);
-
 			console.log(ui.lua);
 		}
 

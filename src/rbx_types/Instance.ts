@@ -3,10 +3,24 @@ const NEW_LINE = "\n".repeat(+LUA_FLATTEN);
 
 export default class Instance {
 	properties: Object;
+	content: Instance;
 	children: Array<Instance>;
 
 	constructor(properties: Object) {
 		this.properties = properties;
+		this.content = this;
+		this.children = [];
+	}
+
+	clone(): Instance {
+		return new Instance(Object.assign({}, this.properties));
+	}
+
+	merge(other: Instance): Instance {
+		return new Instance(Object.assign({}, this.properties, other.properties))
+	}
+
+	clearChildren() {
 		this.children = [];
 	}
 
