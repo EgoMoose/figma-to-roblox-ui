@@ -1,5 +1,5 @@
-const LUA_FLATTEN = true;
-const NEW_LINE = "\n".repeat(+LUA_FLATTEN);
+const LUA_FLATTEN = false;
+const NEW_LINE = "\n".repeat(+!LUA_FLATTEN);
 
 export default class Instance {
 	properties: Object;
@@ -43,9 +43,9 @@ export default class Instance {
 	}
 
 	toLua(depth: number = 0): string {
-		const indentA = "\t".repeat((depth + 1) * +LUA_FLATTEN);
-		const indentB = "\t".repeat((depth + 2) * +LUA_FLATTEN);
-		const indentC = "\t".repeat(depth * +LUA_FLATTEN);
+		const indentA = "\t".repeat((depth + 1) * +!LUA_FLATTEN);
+		const indentB = "\t".repeat((depth + 2) * +!LUA_FLATTEN);
+		const indentC = "\t".repeat(depth * +!LUA_FLATTEN);
 
 		let lua = `{${NEW_LINE}`;
 
