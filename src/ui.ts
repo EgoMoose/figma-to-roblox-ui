@@ -35,7 +35,7 @@ window.onmessage = async (event) => {
 				output = output.replace(`figma://${i}`, `figma://${lookup[i]}`);
 			}
 
-			zip.file(`${ui.name}/create.lua`, output);
+			zip.file(`${ui.name}/${ui.name}.lua`, output);
 		}
 
 		zip.generateAsync({ type: "blob" }).then((content: Blob) => {
