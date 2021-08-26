@@ -1,5 +1,9 @@
 import JSZip from "../node_modules/jszip/dist/jszip.min.js";
 
+function typedArrayToBuffer(array) {
+	return array.buffer.slice(array.byteOffset, array.byteLength + array.byteOffset)
+}
+
 window.onmessage = async (event) => {
 	if (!event.data.pluginMessage) return;
 
@@ -9,8 +13,29 @@ window.onmessage = async (event) => {
 		let zip = new JSZip();
 		
 		for (let ui of serialized) {
-			zip.file(`${ui.name}.lua`, ui.lua);
-			console.log(ui.lua);
+			let count = 0;
+			let processed = {};
+			let lookup = [];
+
+			for (let image of ui.images) {
+				let hash = image.bytes.join("");
+				if (!processed[hash] && processed[hash] !== 0) {
+					processed[hash] = count;
+					let cleanBytes = typedArrayToBuffer(image.bytes);
+					let blob = new Blob([ cleanBytes ], { type: "image/png" });
+					zip.file(`${ui.name}/${count}.png`, blob, {base64: true});
+					count++;
+				}
+
+				lookup[image.index] = processed[hash];
+			}
+
+			let output = ui.lua;
+			for (let i = 0; i < lookup.length; i++) {
+				output = output.replace(`figma://${i}`, `figma://${lookup[i]}`);
+			}
+
+			zip.file(`${ui.name}/create.lua`, output);
 		}
 
 		zip.generateAsync({ type: "blob" }).then((content: Blob) => {
@@ -19,7 +44,7 @@ window.onmessage = async (event) => {
 			link.className = "button button--primary";
 			link.href = blobURL;
 			link.download = "export.zip";
-			//link.click();
+			link.click();
 			link.setAttribute("download", "export.zip");
 			resolve(undefined);
 		});

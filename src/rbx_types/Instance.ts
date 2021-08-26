@@ -30,10 +30,6 @@ export default class Instance {
 		return copy;
 	}
 
-	merge(other: Instance): Instance {
-		return new Instance(Object.assign({}, this.properties, other.properties))
-	}
-
 	clearChildren() {
 		this.children = [];
 	}

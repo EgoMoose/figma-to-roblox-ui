@@ -1,6 +1,16 @@
 import { Instance } from './rbx_types';
 import * as NodeTypes from './node_types';
 
+const DEFAULT_EXPORT = {
+	format: "PNG", 
+	suffix: '', 
+	constraint: { 
+		type: "SCALE", 
+		value: 1 
+	}, 
+	contentsOnly: true
+}
+
 function getInstance(node: SceneNode): Instance {
 	let instance = null;
 	
@@ -26,6 +36,14 @@ function getInstanceWithChildren(node: SceneNode): Instance {
 	return instance;
 }
 
+function getAllInstances(instance: Instance): Instance[] {
+	let all = [instance];
+	for (let child of instance.children) {
+		all = all.concat(getAllInstances(child));
+	}
+	return all;
+}
+
 async function main(nodes: Array<SceneNode>) {
 	let serialized = [];
 
@@ -33,8 +51,27 @@ async function main(nodes: Array<SceneNode>) {
 		let instance = getInstanceWithChildren(node);
 
 		if (instance) {
+			let images = [];
+
+			for (let descendant of getAllInstances(instance)) {
+				let imageNode = descendant.properties.Image
+				if (imageNode) {
+					let index = images.length
+
+					images.push({
+						name: imageNode.name,
+						index: index,
+						bytes: await imageNode.exportAsync(DEFAULT_EXPORT),
+					});
+
+					// this is a non-existent protocol, but we'll replace it later
+					descendant.properties.Image = `figma://${index}`;
+				}
+			}
+
 			serialized.push({
 				name: node.name,
+				images: images,
 				lua: "return " + instance.toLua(),
 			});
 		}
