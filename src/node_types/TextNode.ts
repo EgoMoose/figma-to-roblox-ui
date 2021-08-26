@@ -1,4 +1,4 @@
-import Frame from "./Frame";
+import Frame from "./FrameNode";
 import * as Utils from "./Utilities";
 import * as RbxTypes from "../rbx_types";
 
