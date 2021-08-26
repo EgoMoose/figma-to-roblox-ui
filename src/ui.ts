@@ -10,7 +10,7 @@ window.onmessage = async (event) => {
 		
 		for (let ui of serialized) {
 			zip.file(`${ui.name}.lua`, ui.lua);
-			//console.log(ui.lua);
+			console.log(ui.lua);
 		}
 
 		zip.generateAsync({ type: "blob" }).then((content: Blob) => {

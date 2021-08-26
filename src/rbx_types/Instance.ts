@@ -51,8 +51,10 @@ export default class Instance {
 
 		for (let property in this.properties) {
 			let value = this.properties[property]
-			let stringified = typeof value === "string" ? `"${value}"` : `${value}`
-			lua += `${indentA}["${property}"] = ${stringified},${NEW_LINE}`;
+			if (value) {
+				let stringified = typeof value === "string" ? `"${value}"` : `${value}`;
+				lua += `${indentA}["${property}"] = ${stringified},${NEW_LINE}`;
+			}
 		}
 
 		if (this.children.length > 0) {
