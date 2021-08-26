@@ -194,7 +194,7 @@ function getRoundedBorderInstance(node, strokeRGBA) {
 export default function Frame(node) {
 	let position = Utils.getPosition(node);
 	let strokeRGBA = Utils.getStrokeRGBA(node);
-	let backgroundRGBA = Utils.getBackgroundRGBA(node);
+	let backgroundRGBA = Utils.getFillRGBA(node);
 
 	let frame = new RbxTypes.Instance({
 		"ClassName": "Frame",

@@ -1,4 +1,4 @@
-export function getBackgroundRGBA(node) {
+export function getFillRGBA(node) {
 	let fills = node.fills;
 
 	if (fills && fills.length === 1) {
