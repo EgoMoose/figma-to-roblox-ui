@@ -65,6 +65,7 @@ async function main(nodes: Array<SceneNode>) {
 					});
 
 					// this is a non-existent protocol, but we'll replace it later
+					imageNode.remove();
 					descendant.properties.Image = `figma://${index}`;
 				}
 			}
