@@ -4,10 +4,60 @@ function typedArrayToBuffer(array) {
 	return array.buffer.slice(array.byteOffset, array.byteLength + array.byteOffset)
 }
 
+async function decode(canvas, ctx, bytes) {
+	const url = URL.createObjectURL(new Blob([bytes]))
+	const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+		const img = new Image()
+		img.onload = () => resolve(img)
+		img.onerror = () => reject()
+		img.src = url
+	})
+
+	canvas.width = image.width
+	canvas.height = image.height
+	ctx.drawImage(image, 0, 0)
+	const imageData = ctx.getImageData(0, 0, image.width, image.height)
+	return imageData
+}
+
+async function encode(canvas, ctx, imageData) {
+	ctx.putImageData(imageData, 0, 0)
+
+	return await new Promise((resolve, reject) => {
+		canvas.toBlob(blob => {
+			const reader = new FileReader()
+			reader.onload = () => resolve(new Uint8Array(reader.result as ArrayBuffer))
+			reader.onerror = () => reject(new Error('Could not read from blob'))
+			reader.readAsArrayBuffer(blob)
+		})
+	})
+}
+
 window.onmessage = async (event) => {
 	if (!event.data.pluginMessage) return;
 
 	const { serialized } = event.data.pluginMessage;
+	const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+	for (let ui of serialized) {
+		for (let image of ui.images) {
+			const imageData = await decode(canvas, ctx, image.bytes)
+			const pixels = imageData.data
+
+			for (let i = 0; i < pixels.length; i += 4) {
+				let r = pixels[i + 0],
+					a = pixels[i + 3];
+
+				pixels[i + 0] = 255;
+				pixels[i + 1] = 255;
+				pixels[i + 2] = 255;
+				pixels[i + 3] = (r === 255) ? 0 : a;
+			}
+
+			image.bytes = await encode(canvas, ctx, imageData)
+		}
+	}
 
 	return new Promise(resolve => {
 		let zip = new JSZip();

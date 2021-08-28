@@ -56,17 +56,19 @@ async function main(nodes: Array<SceneNode>) {
 			for (let descendant of getAllInstances(instance)) {
 				let imageNode = descendant.properties.Image
 				if (imageNode) {
-					let index = images.length
+					let index = images.length;
 
 					images.push({
 						name: imageNode.name,
 						index: index,
 						bytes: await imageNode.exportAsync(DEFAULT_EXPORT),
+						isEffect: !!descendant.properties.IsEffect,
 					});
 
 					// this is a non-existent protocol, but we'll replace it later
 					imageNode.remove();
 					descendant.properties.Image = `figma://${index}`;
+					descendant.properties.IsEffect = null;
 				}
 			}
 

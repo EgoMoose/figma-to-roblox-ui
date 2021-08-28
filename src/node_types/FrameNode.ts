@@ -7,6 +7,10 @@ const ALIGN_OFFSETS = {
 	"INSIDE": 0,
 }
 
+const SUPPORTED_EFFECTS = {
+	"DROP_SHADOW": true,
+}
+
 function getNonRoundedBorderInstance(node, strokeRGBA) {
 	let offset = ALIGN_OFFSETS[node.strokeAlign];
 
@@ -191,6 +195,44 @@ function getRoundedBorderInstance(node, strokeRGBA) {
 	return container;
 }
 
+function createEffectFrame(node, effectIndex) {
+	let imageNode = node.clone();
+	let effect = imageNode.effects[effectIndex]
+
+	imageNode.fills = [{
+		visible: true,
+		opacity: 1,
+		blendMode: "LIGHTEN",
+
+		type: "SOLID",
+		color: {r: 1, g: 0, b: 0},
+	}];
+
+	imageNode.effects = [{
+		type: effect.type,
+		color: {r: 0, g: 1, b: 0, a: 1},
+		blendMode: effect.blendMode,
+		offset: effect.offset,
+		radius: effect.radius,
+		spread: effect.spread,
+		visible: effect.visible,
+		showShadowBehindNode: false,
+	}];
+
+	imageNode.strokes = [];
+
+	return new RbxTypes.Instance({
+		"ClassName": "ImageLabel",
+		"BackgroundTransparency": 1,
+		"Name": effect.type,
+
+		"Image": imageNode,
+		"IsEffect": true,
+		"ImageTransparency": 1 - effect.color.a,
+		"ImageColor": new RbxTypes.Color3(effect.color.r, effect.color.g, effect.color.b),
+	});
+}
+
 export default function Frame(node) {
 	let position = Utils.getPosition(node);
 	let strokeRGBA = Utils.getStrokeRGBA(node);
@@ -219,31 +261,46 @@ export default function Frame(node) {
 
 		frame.addChild(radius);
 	}
+
+	let hasBorder = (strokeRGBA[3] !== 0 && node.strokeWeight > 0);
+	let validEffects = []
 	
-	if (strokeRGBA[3] !== 0 && node.strokeWeight > 0) {
+	for (let i = 0; i < node.effects.length; i++) {
+		let effect = node.effects[i];
+		if (SUPPORTED_EFFECTS[effect.type]) {
+			validEffects.push(i);
+		}
+	}
+
+	if (hasBorder || validEffects.length > 0) {
 		let content = frame.clone();
 		content.properties.Name = "Content";
 		content.properties.Size = new RbxTypes.UDim2(1, 0, 1, 0);
 		content.properties.Position = new RbxTypes.UDim2(0, 0, 0, 0);
 		content.properties.Rotation = null;
 		content.properties.ZIndex = 1;
-		
+
 		frame.clearChildren();
 		frame.properties.ClipsDescendants = false;
 		frame.properties.BackgroundTransparency = 1;
 		frame.properties.BackgroundColor3 = null;
 		frame.properties.ZIndex = 2;
 
-		let border = null;
-		if (node.cornerRadius > 0) {
-			border = getRoundedBorderInstance(node, strokeRGBA);
-		} else {
-			border = getNonRoundedBorderInstance(node, strokeRGBA);
+		if (hasBorder) {
+			let border = null;
+			if (node.cornerRadius > 0) {
+				border = getRoundedBorderInstance(node, strokeRGBA);
+			} else {
+				border = getNonRoundedBorderInstance(node, strokeRGBA);
+			}
+			frame.addChild(border);
 		}
 
-		frame.addChild(border);
-		frame.addChild(content);
+		for (let index of validEffects) {
+			frame.addChild(createEffectFrame(node, index));
+		}
 
+		frame.addChild(content);
 		frame.content = content;
 	}
 

@@ -5,7 +5,7 @@
   "main": "code.js",
   "scripts": {
     "build-dev": "npx webpack --mode=development",
-	"build-opt": "npx webpack --mode=production"
+    "build-opt": "npx webpack --mode=production"
   },
   "author": "",
   "license": "",
