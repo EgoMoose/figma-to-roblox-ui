@@ -34,10 +34,16 @@ end
 button.Click:Connect(function()
 	button.Enabled = false
 
+	local files = StudioService:PromptImportFiles({"lua", "png"}) or {}
+	
+	if #files == 0 then
+		button.Enabled = true
+		return true
+	end
+
 	local lua, luaFile = nil, nil
 	local module = Instance.new("ModuleScript")
 	local imageFiles = {}
-	local files = StudioService:PromptImportFiles({"lua", "png"}) or {}
 
 	for _, file in pairs(files) do
 		local extension = getExtension(file)
