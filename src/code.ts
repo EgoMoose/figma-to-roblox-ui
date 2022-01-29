@@ -33,6 +33,8 @@ async function getInstanceWithChildren(node: SceneNode): Instance {
 		}
 	}
 
+	instance.children.reverse();
+
 	return instance;
 }
 

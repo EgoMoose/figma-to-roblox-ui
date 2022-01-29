@@ -367,13 +367,11 @@ export default async function Frame(node) {
 		content.properties.Size = new RbxTypes.UDim2(1, 0, 1, 0);
 		content.properties.Position = new RbxTypes.UDim2(0, 0, 0, 0);
 		content.properties.Rotation = null;
-		content.properties.ZIndex = 1;
 
 		frame.clearChildren();
 		frame.properties.ClipsDescendants = false;
 		frame.properties.BackgroundTransparency = 1;
 		frame.properties.BackgroundColor3 = null;
-		frame.properties.ZIndex = 2;
 
 		if (hasBorder) {
 			let border = null;
