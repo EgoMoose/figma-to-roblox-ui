@@ -11,7 +11,7 @@ const DEFAULT_EXPORT = {
 	contentsOnly: true
 }
 
-function getInstance(node: SceneNode): Instance {
+async function getInstance(node: SceneNode): Instance {
 	let instance = null;
 	
 	if (NodeTypes[node.type]) {
@@ -21,12 +21,12 @@ function getInstance(node: SceneNode): Instance {
 	return instance;
 }
 
-function getInstanceWithChildren(node: SceneNode): Instance {
-	let instance = getInstance(node);
+async function getInstanceWithChildren(node: SceneNode): Instance {
+	let instance = await getInstance(node);
 
 	if (instance && "children" in node) {
 		for (let childNode of node.children) {
-			let childInstance = getInstanceWithChildren(childNode);
+			let childInstance = await getInstanceWithChildren(childNode);
 			if (childInstance) {
 				instance.content.addChild(childInstance);
 			}
@@ -48,7 +48,7 @@ async function main(nodes: Array<SceneNode>) {
 	let serialized = [];
 
 	for (const node of nodes) {
-		let instance = getInstanceWithChildren(node);
+		let instance = await getInstanceWithChildren(node);
 
 		if (instance) {
 			let images = [];
@@ -61,14 +61,12 @@ async function main(nodes: Array<SceneNode>) {
 					images.push({
 						name: imageNode.name,
 						index: index,
-						bytes: await imageNode.exportAsync(DEFAULT_EXPORT),
-						isEffect: !!descendant.properties.IsEffect,
+						bytes: await imageNode.exportAsync(),
 					});
 
-					// this is a non-existent protocol, but we'll replace it later
 					imageNode.remove();
+					// this is a non-existent roblox content protocol, but we'll replace it later
 					descendant.properties.Image = `figma://${index}`;
-					descendant.properties.IsEffect = null;
 				}
 			}
 

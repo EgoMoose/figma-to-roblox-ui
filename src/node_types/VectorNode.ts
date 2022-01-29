@@ -2,8 +2,8 @@ import Frame from "./FrameNode";
 import * as Utils from "./Utilities";
 import * as RbxTypes from "../rbx_types";
 
-export default function Vector(node) {
-	let vector = Frame(node);
+export default async function Vector(node) {
+	let vector = await Frame(node);
 
 	let imageNode = node.clone();
 	let imageRGBA = Utils.getFillRGBA(node);

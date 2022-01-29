@@ -1,5 +1,5 @@
 import Frame from "./FrameNode";
 
-export default function Rectangle(node) {
-	return Frame(node);
+export default async function Rectangle(node) {
+	return await Frame(node);
 }

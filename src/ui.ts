@@ -37,27 +37,6 @@ window.onmessage = async (event) => {
 	if (!event.data.pluginMessage) return;
 
 	const { serialized } = event.data.pluginMessage;
-	const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-	for (let ui of serialized) {
-		for (let image of ui.images) {
-			const imageData = await decode(canvas, ctx, image.bytes)
-			const pixels = imageData.data
-
-			for (let i = 0; i < pixels.length; i += 4) {
-				let r = pixels[i + 0],
-					a = pixels[i + 3];
-
-				pixels[i + 0] = 255;
-				pixels[i + 1] = 255;
-				pixels[i + 2] = 255;
-				pixels[i + 3] = (r === 255) ? 0 : a;
-			}
-
-			image.bytes = await encode(canvas, ctx, imageData)
-		}
-	}
 
 	return new Promise(resolve => {
 		let zip = new JSZip();

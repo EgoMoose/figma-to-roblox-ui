@@ -1,5 +1,5 @@
 import Component from "./ComponentNode";
 
-export default function InstanceNode(node) {
-	return Component(node);
+export default async function InstanceNode(node) {
+	return await Component(node);
 }

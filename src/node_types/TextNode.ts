@@ -186,11 +186,11 @@ function getRichText(node) {
 	return richTexts.join("").replace("\n", "");
 }
 
-export default function Text(node) {
+export default async function Text(node) {
 	let modifiedNode = node.clone();
 	modifiedNode.strokes = [];
 
-	let frame = Frame(modifiedNode);
+	let frame = await Frame(modifiedNode);
 	let label = frame.content;
 
 	modifiedNode.remove();

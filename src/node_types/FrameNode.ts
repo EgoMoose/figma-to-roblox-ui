@@ -195,45 +195,134 @@ function getRoundedBorderInstance(node, strokeRGBA) {
 	return container;
 }
 
-function createEffectFrame(node, effectIndex) {
+async function getExportedImageSize(node) {
+	let bytes = await node.exportAsync()
+	let dataView = new DataView(bytes.buffer, 0, 28)
+
+	return {
+		width: dataView.getInt32(16),
+		height: dataView.getInt32(20)
+	}
+}
+
+async function createDropShadowFrame(node, effectIndex) {
 	let imageNode = node.clone();
-	let effect = imageNode.effects[effectIndex]
+	let effect = imageNode.effects[effectIndex];
+
+	if (imageNode.children) {
+		for (let child of imageNode.children) {
+			child.remove();
+		}
+	}
+
+	let totalOpacity = 0;
+	if (imageNode.fills) {
+		for (let fill of imageNode.fills) {
+			totalOpacity = totalOpacity + fill.opacity;
+		}
+	}
+
+	imageNode.x = imageNode.x + effect.offset.x;
+	imageNode.y = imageNode.y + effect.offset.y;
+
+	imageNode.resize(
+		imageNode.width + effect.spread * 2,
+		imageNode.height + effect.spread * 2
+	);
 
 	imageNode.fills = [{
 		visible: true,
 		opacity: 1,
-		blendMode: "LIGHTEN",
+		blendMode: "NORMAL",
 
 		type: "SOLID",
-		color: {r: 1, g: 0, b: 0},
+		color: {r: 1, g: 1, b: 1},
 	}];
 
 	imageNode.effects = [{
-		type: effect.type,
-		color: {r: 0, g: 1, b: 0, a: 1},
-		blendMode: effect.blendMode,
-		offset: effect.offset,
+		type: "LAYER_BLUR",
 		radius: effect.radius,
-		spread: effect.spread,
 		visible: effect.visible,
-		showShadowBehindNode: false,
 	}];
 
 	imageNode.strokes = [];
 
+	let size = await getExportedImageSize(imageNode);
+
+	if (totalOpacity < 1 && effect.showShadowBehindNode == false) {
+		let copy = imageNode.clone();
+
+		copy.x = node.x;
+		copy.y = node.y;
+
+		copy.effects = [];
+
+		let group = figma.group([copy, imageNode], figma.currentPage);
+
+		// create a mask the size of the group
+		let maskSize = await getExportedImageSize(group);
+
+		let mask = figma.createRectangle();
+		mask.x = group.x - maskSize.width / 2;
+		mask.y = group.y - maskSize.height / 2;
+		mask.resize(maskSize.width * 2, maskSize.height * 2);
+		
+		figma.currentPage.appendChild(mask);
+		figma.currentPage.appendChild(copy);
+
+		// punch a hole through the mask of the original un-blurred node
+		// this essentially makes an inverse mask (everywhere visible except the "copy" area)
+		// that only shows the drop shadow
+		let punchedMask = figma.subtract([mask, copy], figma.currentPage);
+
+		punchedMask.isMask = true;
+
+		group.insertChild(0, punchedMask);
+
+		// make a container frame the size of size
+		let container = figma.createFrame();
+
+		container.fills = [{
+			visible: true,
+			opacity: 0,
+			blendMode: "NORMAL",
+	
+			type: "SOLID",
+			color: {r: 1, g: 1, b: 1},
+		}];
+
+		container.x = imageNode.x - (size.width - imageNode.width) / 2;
+		container.y = imageNode.y - (size.height - imageNode.height) / 2;
+		container.resize(size.width, size.height);
+		container.appendChild(group);
+
+		group.x = group.x - container.x;
+		group.y = group.y - container.y;
+
+		figma.currentPage.appendChild(container);
+
+		imageNode = container;
+		//imageNode = null;
+	}
+
 	return new RbxTypes.Instance({
 		"ClassName": "ImageLabel",
 		"BackgroundTransparency": 1,
-		"Name": effect.type,
+		"Name": "DropShadow",
 
 		"Image": imageNode,
-		"IsEffect": true,
 		"ImageTransparency": 1 - effect.color.a,
-		"ImageColor": new RbxTypes.Color3(effect.color.r, effect.color.g, effect.color.b),
+		"ImageColor3": new RbxTypes.Color3(effect.color.r, effect.color.g, effect.color.b),
+
+		"AnchorPoint": new RbxTypes.Vector2(0.5, 0.5),
+		"Position": new RbxTypes.UDim2(0.5, effect.offset.x, 0.5, effect.offset.y),
+		"Size": new RbxTypes.UDim2(1, size.width - node.width, 1, size.height - node.height),
+
+		"ZIndex": 0,
 	});
 }
 
-export default function Frame(node) {
+export default async function Frame(node) {
 	let position = Utils.getPosition(node);
 	let strokeRGBA = Utils.getStrokeRGBA(node);
 	let backgroundRGBA = Utils.getFillRGBA(node);
@@ -297,7 +386,7 @@ export default function Frame(node) {
 		}
 
 		for (let index of validEffects) {
-			frame.addChild(createEffectFrame(node, index));
+			frame.addChild(await createDropShadowFrame(node, index));
 		}
 
 		frame.addChild(content);

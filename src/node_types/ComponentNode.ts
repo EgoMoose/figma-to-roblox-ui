@@ -1,5 +1,5 @@
 import Frame from "./FrameNode";
 
-export default function Component(node) {
-	return Frame(node);
+export default async function Component(node) {
+	return await Frame(node);
 }
