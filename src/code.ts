@@ -11,11 +11,16 @@ const DEFAULT_EXPORT = {
 	contentsOnly: true
 }
 
-async function getInstance(node: SceneNode): Instance {
+async function getInstance(node): Instance {
 	let instance = null;
-	
-	if (NodeTypes[node.type]) {
-		instance = NodeTypes[node.type](node);
+	let nodeType = node.type;
+
+	if (node.fills && (node.fills.length > 1 || node.fills[0].type != "SOLID")) {
+		nodeType = "IMAGE";
+	}
+
+	if (NodeTypes[nodeType]) {
+		instance = NodeTypes[nodeType](node);
 	}
 	
 	return instance;

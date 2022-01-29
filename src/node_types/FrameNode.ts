@@ -215,20 +215,8 @@ async function createDropShadowFrame(node, effectIndex) {
 		}
 	}
 
-	let totalOpacity = 0;
-	if (imageNode.fills) {
-		for (let fill of imageNode.fills) {
-			totalOpacity = totalOpacity + fill.opacity;
-		}
-	}
-
 	imageNode.x = imageNode.x + effect.offset.x;
 	imageNode.y = imageNode.y + effect.offset.y;
-
-	imageNode.resize(
-		imageNode.width + effect.spread * 2,
-		imageNode.height + effect.spread * 2
-	);
 
 	imageNode.fills = [{
 		visible: true,
@@ -249,7 +237,7 @@ async function createDropShadowFrame(node, effectIndex) {
 
 	let size = await getExportedImageSize(imageNode);
 
-	if (totalOpacity < 1 && effect.showShadowBehindNode == false) {
+	if (effect.showShadowBehindNode == false) {
 		let copy = imageNode.clone();
 
 		copy.x = node.x;
@@ -303,6 +291,11 @@ async function createDropShadowFrame(node, effectIndex) {
 
 		imageNode = container;
 		//imageNode = null;
+	} else {
+		imageNode.resize(
+			imageNode.width + effect.spread * 2,
+			imageNode.height + effect.spread * 2
+		);
 	}
 
 	return new RbxTypes.Instance({
