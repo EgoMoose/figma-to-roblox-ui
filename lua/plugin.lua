@@ -72,6 +72,7 @@ button.Click:Connect(function()
 	end
 
 	local screen = Instance.new("ScreenGui")
+	screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 	screen.Name = luaFile.Name:sub(1, -5)
 	screen.Parent = StarterGui
 
