@@ -15,7 +15,7 @@ async function getInstance(node): Instance {
 	let instance = null;
 	let nodeType = node.type;
 
-	if (node.fills && (node.fills.length > 1 || node.fills[0].type != "SOLID")) {
+	if (node.fills && node.fills.length > 0 && (node.fills.length > 1 || node.fills[0].type != "SOLID")) {
 		nodeType = "IMAGE";
 	}
 
