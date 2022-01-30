@@ -205,9 +205,26 @@ async function getExportedImageSize(node) {
 	}
 }
 
+async function convertToRectangle(node) {
+	let rect = figma.createRectangle();
+	rect.name = node.name;
+	rect.x = node.x;
+	rect.y = node.y;
+	rect.cornerRadius = node.cornerRadius;
+	rect.resize(node.width, node.height);
+	node.parent.appendChild(rect);
+	return rect;
+}
+
 async function createDropShadowFrame(node, effectIndex) {
-	let imageNode = node.clone();
-	let effect = imageNode.effects[effectIndex];
+	let effect = node.effects[effectIndex];
+
+	let imageNode = null;
+	if (node.type == "FRAME") {
+		imageNode = await convertToRectangle(node);
+	} else {
+		imageNode = node.clone();
+	}
 
 	if (imageNode.children) {
 		for (let child of imageNode.children) {
@@ -215,8 +232,8 @@ async function createDropShadowFrame(node, effectIndex) {
 		}
 	}
 
-	imageNode.x = imageNode.x + effect.offset.x;
-	imageNode.y = imageNode.y + effect.offset.y;
+	imageNode.x = 0;
+	imageNode.y = 0;
 
 	imageNode.fills = [{
 		visible: true,
@@ -240,28 +257,32 @@ async function createDropShadowFrame(node, effectIndex) {
 	if (effect.showShadowBehindNode == false) {
 		let copy = imageNode.clone();
 
-		copy.x = node.x;
-		copy.y = node.y;
+		figma.currentPage.appendChild(imageNode);
+		figma.currentPage.appendChild(copy);
 
 		copy.effects = [];
+		copy.x = 0;
+		copy.y = 0;
+
+		imageNode.x = effect.offset.x;
+		imageNode.y = effect.offset.y;
 
 		let group = figma.group([copy, imageNode], figma.currentPage);
 
 		// create a mask the size of the group
 		let maskSize = await getExportedImageSize(group);
-
 		let mask = figma.createRectangle();
-		mask.x = group.x - maskSize.width / 2;
-		mask.y = group.y - maskSize.height / 2;
+
+		figma.currentPage.insertChild(0, mask);
+
+		mask.x = -maskSize.width / 2;
+		mask.y = -maskSize.height / 2;
 		mask.resize(maskSize.width * 2, maskSize.height * 2);
 		
-		figma.currentPage.appendChild(mask);
-		figma.currentPage.appendChild(copy);
-
 		// punch a hole through the mask of the original un-blurred node
 		// this essentially makes an inverse mask (everywhere visible except the "copy" area)
 		// that only shows the drop shadow
-		let punchedMask = figma.subtract([mask, copy], figma.currentPage);
+		let punchedMask = figma.subtract([mask, copy], group);
 
 		punchedMask.isMask = true;
 
@@ -290,7 +311,6 @@ async function createDropShadowFrame(node, effectIndex) {
 		figma.currentPage.appendChild(container);
 
 		imageNode = container;
-		//imageNode = null;
 	} else {
 		imageNode.resize(
 			imageNode.width + effect.spread * 2,
