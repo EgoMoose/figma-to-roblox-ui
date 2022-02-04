@@ -218,9 +218,10 @@ async function convertToRectangle(node) {
 
 async function createDropShadowFrame(node, effectIndex) {
 	let effect = node.effects[effectIndex];
+	let maskShadow = (effect.showShadowBehindNode == false)
 
 	let imageNode = null;
-	if (node.type == "FRAME") {
+	if (node.type == "FRAME" && maskShadow) {
 		imageNode = await convertToRectangle(node);
 	} else {
 		imageNode = node.clone();
@@ -254,7 +255,7 @@ async function createDropShadowFrame(node, effectIndex) {
 
 	let size = await getExportedImageSize(imageNode);
 
-	if (effect.showShadowBehindNode == false) {
+	if (maskShadow) {
 		let copy = imageNode.clone();
 
 		figma.currentPage.appendChild(imageNode);
