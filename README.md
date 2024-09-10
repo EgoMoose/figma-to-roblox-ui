@@ -1,3 +1,5 @@
+**NOTE:** This project is archived as I have no intention of continuing to work on it. This code is very crusty and there most certainly better options out there. Just posting this in case someone might get some use out of it.
+
 # figma-to-roblox-ui
 Converts a figma project into Roblox UI
 
